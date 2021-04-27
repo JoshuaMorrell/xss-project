@@ -1,0 +1,17 @@
+{
+  "name": "xss",
+  "version": "1.0.0",
+  "description": "Simple web app that demonstrates the popular xss attack",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon vulnerable-site/app.js & nodemon malicious-site/app.js && fg"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.4"
+  }
+}

